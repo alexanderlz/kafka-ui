@@ -10,7 +10,7 @@ import io.kafbat.ui.model.KafkaCluster;
 import io.kafbat.ui.model.SortOrderDTO;
 import io.kafbat.ui.service.rbac.AccessControlService;
 import io.kafbat.ui.util.ApplicationMetrics;
-import io.kafbat.ui.util.SslPropertiesUtil;
+import io.kafbat.ui.util.KafkaClientSslPropertiesUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -264,8 +264,9 @@ public class ConsumerGroupService {
   public EnhancedConsumer createConsumer(KafkaCluster cluster,
                                          Map<String, Object> properties) {
     Properties props = new Properties();
-    SslPropertiesUtil.addKafkaSslProperties(cluster.getOriginalProperties().getSsl(), props);
+    KafkaClientSslPropertiesUtil.addKafkaSslProperties(cluster.getOriginalProperties().getSsl(), props);
     props.putAll(cluster.getProperties());
+    props.putAll(cluster.getConsumerProperties());
     props.put(ConsumerConfig.CLIENT_ID_CONFIG, "kafbat-ui-consumer-" + System.currentTimeMillis());
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, cluster.getBootstrapServers());
     props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");

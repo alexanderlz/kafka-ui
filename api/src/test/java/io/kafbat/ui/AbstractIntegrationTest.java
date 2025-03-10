@@ -12,6 +12,7 @@ import java.util.Properties;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.common.IsolationLevel;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.io.TempDir;
@@ -37,10 +38,7 @@ public abstract class AbstractIntegrationTest {
   public static final String LOCAL = "local";
   public static final String SECOND_LOCAL = "secondLocal";
 
-  private static final boolean IS_ARM =
-      System.getProperty("os.arch").contains("arm") || System.getProperty("os.arch").contains("aarch64");
-
-  private static final String CONFLUENT_PLATFORM_VERSION = IS_ARM ? "7.8.0.arm64" : "7.8.0";
+  private static final String CONFLUENT_PLATFORM_VERSION = "7.8.0";
 
   public static final KafkaContainer kafka = new KafkaContainer(
       DockerImageName.parse("confluentinc/cp-kafka").withTag(CONFLUENT_PLATFORM_VERSION))
@@ -104,6 +102,12 @@ public abstract class AbstractIntegrationTest {
       System.setProperty("kafka.clusters.0.masking.0.topicValuesPattern", "masking-test-.*");
       System.setProperty("kafka.clusters.0.audit.topicAuditEnabled", "true");
       System.setProperty("kafka.clusters.0.audit.consoleAuditEnabled", "true");
+
+      System.setProperty("kafka.clusters.0.consumerProperties.request.timeout.ms", "60000");
+      System.setProperty("kafka.clusters.0.consumerProperties.isolation.level",
+          IsolationLevel.READ_COMMITTED.toString());
+      System.setProperty("kafka.clusters.0.producerProperties.request.timeout.ms", "45000");
+      System.setProperty("kafka.clusters.0.producerProperties.max.block.ms", "80000");
 
       System.setProperty("kafka.clusters.1.name", SECOND_LOCAL);
       System.setProperty("kafka.clusters.1.readOnly", "true");
